@@ -1,0 +1,20 @@
+---
+title: "Chl Initial Data Exploration"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+library(tidyverse)
+library(lubridate)
+
+chlMonthly <- read_csv("data/derivative/UMR_chl_tribs_bymonth_curated.csv") %>%
+  mutate(time = ymd(paste(year, month, 15, sep="-")))
+
+ggplot(chlMonthly, aes(x=time, y=CHLcal, color=Name)) +
+  geom_line() +
+  geom_point() +
+  facet_wrap(.~Name)
+ 
+```
+
+
