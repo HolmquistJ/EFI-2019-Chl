@@ -30,7 +30,7 @@ dat1 <- left_join(dat, yrz, by = "year")
 
 ####Model
 model_name = 'RandomWalk_River_data' # options are RandomWalk, RandomWalkZip, Logistic, Exponential, DayLength, DayLength_Quad, RandomYear, TempExp, Temp_Quad,  ChangepointTempExp
-model=paste0("C:/Users/Mary Lofton/Documents/NEFI/",model_name, '.R') #Do not edit
+model=paste0("scripts/",model_name, '.R') #Do not edit
 
 
 #Random Walk

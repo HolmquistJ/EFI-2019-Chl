@@ -29,7 +29,6 @@ ggplot(chlMonthly, aes(x=doy, y=CHLcal, color=Name)) +
   facet_grid(year~Name) +
   scale_y_log10()
 
-
 ```
 
 
