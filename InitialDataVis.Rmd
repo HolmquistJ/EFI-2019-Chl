@@ -7,14 +7,29 @@ output: html_document
 library(tidyverse)
 library(lubridate)
 
+```
+
+```{r initial data exploration}
 chlMonthly <- read_csv("data/derivative/UMR_chl_tribs_bymonth_curated.csv") %>%
-  mutate(time = ymd(paste(year, month, 15, sep="-")))
+  mutate(time = ymd(paste(year, month, 15, sep="-")),
+         doy = yday(time))
 
 ggplot(chlMonthly, aes(x=time, y=CHLcal, color=Name)) +
   geom_line() +
   geom_point() +
-  facet_wrap(.~Name)
- 
+  facet_wrap(.~Name) +
+  scale_y_log10()
+```
+
+```{r year to year, fig.height=8.5, fig.width=11}
+
+ggplot(chlMonthly, aes(x=doy, y=CHLcal, color=Name)) +
+  geom_line() +
+  geom_point() +
+  facet_grid(year~Name) +
+  scale_y_log10()
+
+
 ```
 
 
