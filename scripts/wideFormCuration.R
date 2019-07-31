@@ -14,7 +14,8 @@ targetYearDays <- expand.grid(year=min(chl$year):max(chl$year),
 chlWide <- chl %>%
   bind_rows(targetYearDays) %>%
   #select(Name, fracYear, CHLcal) %>%
-  spread(key=Name, value=CHLcal)
+  spread(key=Name, value=CHLcal) %>%
+  select("<NA>")
 
 write_csv(chlWide, "data/derivative/UMR_chl_tribs_bymonth_curated_wideForm.csv")
 
