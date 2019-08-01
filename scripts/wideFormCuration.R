@@ -15,7 +15,7 @@ chlWide <- chl %>%
   bind_rows(targetYearDays) %>%
   #select(Name, fracYear, CHLcal) %>%
   spread(key=Name, value=CHLcal) %>%
-  select("<NA>")
+  select(-"<NA>")
 
 write_csv(chlWide, "data/derivative/UMR_chl_tribs_bymonth_curated_wideForm.csv")
 
