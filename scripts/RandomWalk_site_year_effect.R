@@ -3,7 +3,7 @@
     
   for(i in 1:max_site){
   
-    for(j in 1:max_year){
+    for(j in 1:N){
     #this fits the model to your observed data. 
     y[i,j] ~ dnorm(mu[i,j], tau_obs)
       
@@ -12,7 +12,7 @@
    #### Process Model
   
     
-    for (j in 2:max_year){
+    for (j in 2:N){
     mu[i,j]~dnorm(x[i,j],tau_add) #mus are the latent state (true chl-a)
     x[i,j] <- x[i,j-1] + yr[year_no[j]] + site[site_no[i]]
     
