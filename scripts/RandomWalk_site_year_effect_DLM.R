@@ -14,7 +14,7 @@
     
     for (j in 2:N){
     mu[i,j]~dnorm(x[i,j],tau_add) #mus are the latent state (true chl-a)
-    x[i,j] <- x[i,j-1] + yr[year_no[j]] + site[site_no[i]]
+    x[i,j] <- beta0 + beta1*x[i,j-1] + beta2*Temp[i,j] + yr[year_no[j]] + site[site_no[i]]
     
     }
     
