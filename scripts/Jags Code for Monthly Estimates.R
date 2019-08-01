@@ -85,4 +85,8 @@ daysExceededGathered <- daysExceeded %>%
 
 ggplot(data=daysExceeded, aes(x=displayDate)) +
   geom_point(aes(y=median)) +
-  geom_segment(aes(y=lowerCI, yend=upperCI, xend=displayDate))
+  geom_segment(aes(y=lowerCI, yend=upperCI, xend=displayDate)) +
+  xlab("Sampling Month") +
+  ylab("n days Chl>30") +
+  theme_minimal()
+  
