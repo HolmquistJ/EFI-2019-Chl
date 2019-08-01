@@ -30,6 +30,9 @@ N = ncol(y)
 
 #identify covariate and look at histogram
 Temp <- t(as.matrix(Temp))
+Temp_NA <- is.na(Temp)
+Temp_NA[,1:240] <- as.numeric(Temp_NA[,1:240])
+
 hist(Temp)
 
 #data wrangling to get year_no for year effect and site_no for site effect
@@ -40,6 +43,9 @@ dat1 <- read_csv("./data/derivative/UMR_chl_tribs_bymonth_curated.csv") %>%
   arrange(Name)
 sites <- unique(dat1$Name)
 site_no = as.numeric(as.factor(sites))
+
+#set up month vector
+month <- rep(c(1:12),20)
 
 ####Model - MUST MANUALLY TYPE IN THE CORRECT MODEL NAME HERE!!!
 model_name = 'DLM_site_year_effect_Temperature' 
@@ -69,11 +75,11 @@ init.RandomWalk_site_year_effect <- list(list(tau_add=0.001, tau_obs = 0.001, ta
 params.RandomWalk_site_year_effect <- c("tau_add", "tau_obs","tau_site","tau_yr")
 
 #DLM w/ site-year effect
-data.DLM_site_year_effect_Temperature <- list(y=y,N = N, Temp = Temp, beta.m=as.vector(c(0,0,0)), beta.v=solve(diag(1E-03,3)), x_ic=20,tau_ic = 0.01, a_add = 0.001,r_add = 0.001, a_obs = 10, r_obs = 10, site_no=site_no, max_site = 9, year_no=year_no, max_year = 20, a_add_Temp = 0.001, r_add_Temp = 0.001, a_obs_Temp = 0.001, r_obs_Temp = 0.001)
-variable.names.DLM_site_year_effect_Temperature<- c("tau_add", "tau_obs", "tau_site", "tau_yr", "tau_add_Temp","tau_obs_Temp", "beta[1]","beta[2]","beta[3]")
-variable.namesout.DLM_site_year_effect_Temperature<- c("tau_add", "mu", "tau_obs", "tau_site","tau_yr", "tau_add_Temp","tau_obs_Temp", "beta[1]","beta[2]","beta[3]")
-init.DLM_site_year_effect_Temperature <- list(list(tau_add=0.01, tau_obs = 0.01, tau_site = 0.01, tau_yr = 0.01, beta=c(-0.5,-0.5,-0.5), tau_add_Temp = 0.01, tau_obs_Temp = 0.01), list(tau_add=0.1, tau_obs = 0.1, tau_site = 0.1, tau_yr = 0.1, beta=c(0,0,0), tau_add_Temp = 0.1, tau_obs_Temp = 0.1), list(tau_add=1, tau_obs = 1, tau_site = 1, tau_yr = 1,  beta=c(0.5,0.5,0.5), tau_add_Temp = 1, tau_obs_Temp = 1))
-params.DLM_site_year_effect_Temperature <- c("tau_add", "tau_obs","tau_site","tau_yr", "tau_add_Temp","tau_obs_Temp", "beta[1]","beta[2]","beta[3]")
+data.DLM_site_year_effect_Temperature <- list(y=y,N = N, Temp = Temp, month = month, beta.m=as.vector(c(0,0,0)), beta.v=solve(diag(1E-03,3)), x_ic=20,tau_ic = 0.01, a_add = 0.001,r_add = 0.001, a_obs = 10, r_obs = 10, site_no=site_no, max_site = 9, year_no=year_no, max_year = 20)
+variable.names.DLM_site_year_effect_Temperature<- c("tau_add", "tau_obs", "tau_site", "tau_yr", "beta[1]","beta[2]","beta[3]", "tau_T")
+variable.namesout.DLM_site_year_effect_Temperature<- c("tau_add", "mu", "tau_obs", "tau_site","tau_yr", "beta[1]","beta[2]","beta[3]", "tau_T")
+init.DLM_site_year_effect_Temperature <- list(list(tau_add=0.01, tau_obs = 0.01, tau_site = 0.01, tau_yr = 0.01,tau_T = 0.01, beta=c(-0.5,-0.5,-0.5)), list(tau_add=0.1, tau_obs = 0.1, tau_site = 0.1, tau_yr = 0.1, tau_T = 0.1,beta=c(0,0,0)), list(tau_add=1, tau_obs = 1, tau_site = 1, tau_yr = 1,tau_T = 1,  beta=c(0.5,0.5,0.5)))
+params.DLM_site_year_effect_Temperature <- c("tau_add", "tau_obs","tau_site","tau_yr", "beta[1]","beta[2]","beta[3]", "tau_T")
 
 
 #get inputs to jags based on the model name you selected above
@@ -107,9 +113,9 @@ params <- jags_plug_ins$params.model
 
 #look at param traceplots
 for (i in 1:length(params)){
-  #png(file=file.path(my_directory,paste(site,paste0(model_name,'_Convergence_',params[i],'.png'), sep = '_')))
+  png(file=file.path("C:/Users/Mary Lofton/Desktop/EFI_2019_WG",paste(paste0(model_name,'_Convergence_',params[i],'.png'), sep = '_')))
   plot(jags.out, vars = params[i]) 
-  #dev.off()
+  dev.off()
 }
 
 #get a matrix to work w/ for predictive intervals, etc.
