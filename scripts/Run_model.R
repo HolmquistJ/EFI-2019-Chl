@@ -8,35 +8,29 @@ library(zoo)
 library(rjags)
 library(runjags)
 
-#load data
-dat <- read_csv("./data/derivative/UMR_chl_tribs_bymonth_curated.csv") %>%
-  mutate(date = ymd(paste(year, month, 15, sep="-"))) 
+#load data and get in correct format
+dat <- read_csv("./data/derivative/UMR_chl_tribs_bymonth_curated_wideForm.csv") %>%
+  select(-fracYear) %>%
+  mutate(date = ymd(paste(year, month, 15, sep="-"))) %>%
+  select(date, Apple:Wapsipinicon) %>%
+  filter(year(date) != 1998) %>%
+  select(-date)
   
-#visualize data
-ggplot(data = dat, aes(x = date, y = CHLcal, color = Name)) +
-  geom_point(size = 1)+
-  theme_bw()
-
 #identify response variable and look at histogram
-y <- dat$CHLcal
+y <- t(as.matrix(dat))
 hist(y)
 
 #data wrangling to get year_no for year effect and site_no for site effect
-years <- unique(dat$year)
-year_no = as.numeric(as.factor(years))
+years <- c(1999:2018)
+year_no = rep(as.numeric(as.factor(years)),each = 12)
 
-sites <- unique(dat$Name)
+dat1 <- read_csv("./data/derivative/UMR_chl_tribs_bymonth_curated.csv") %>%
+  arrange(Name)
+sites <- unique(dat1$Name)
 site_no = as.numeric(as.factor(sites))
 
-yrz <- tibble(year = years, year_no = year_no)
-sitez <- tibble(Name = sites, site_no = site_no)
-
-dat1 <- left_join(dat, yrz, by = "year")
-dat2 <- left_join(dat1, sitez, by = "Name")
-
-
 ####Model - MUST MANUALLY TYPE IN THE CORRECT MODEL NAME HERE!!!
-model_name = 'RandomWalk_site_year_effect' # options are RandomWalk, RandomWalkZip, Logistic, Exponential, DayLength, DayLength_Quad, RandomYear, TempExp, Temp_Quad,  ChangepointTempExp
+model_name = 'RandomWalk_site_year_effect' 
 model=paste0("scripts/",model_name, '.R') #Do not edit
 
 ###List correct inputs to JAGS for each model
@@ -56,7 +50,7 @@ params.RandomWalk_site_effect <- c("tau_add", "tau_obs","tau_site")
 
 
 #Random Walk w/ site-year effect
-data.RandomWalk_site_year_effect <- list(y=y, N=length(y),x_ic=20,tau_ic = 0.01, a_add = 0.001,r_add = 0.001, a_obs = 10, r_obs = 10, site_no=dat2$site_no, max_site = 9, year_no=dat2$year_no, max_year = 21)
+data.RandomWalk_site_year_effect <- list(y=y,x_ic=20,tau_ic = 0.01, a_add = 0.001,r_add = 0.001, a_obs = 10, r_obs = 10, site_no=site_no, max_site = 9, year_no=year_no, max_year = 20)
 variable.names.RandomWalk_site_year_effect<- c("tau_add", "tau_obs", "tau_site", "tau_yr")
 variable.namesout.RandomWalk_site_year_effect<- c("tau_add", "mu", "tau_obs", "tau_site","tau_yr")
 init.RandomWalk_site_year_effect <- list(list(tau_add=0.001, tau_obs = 0.001, tau_site = 0.001, tau_yr = 0.001), list(tau_add=0.1, tau_obs = 0.1, tau_site = 0.1, tau_yr = 0.1), list(tau_add=1, tau_obs = 1, tau_site = 1, tau_yr = 1))
