@@ -19,6 +19,7 @@ dat <- read_csv("./data/derivative/UMR_chl_tribs_bymonth_curated_wideForm.csv") 
 #identify response variable and look at histogram
 y <- t(as.matrix(dat))
 hist(y)
+N = ncol(y)
 
 #data wrangling to get year_no for year effect and site_no for site effect
 years <- c(1999:2018)
@@ -34,23 +35,23 @@ model_name = 'RandomWalk_site_year_effect'
 model=paste0("scripts/",model_name, '.R') #Do not edit
 
 ###List correct inputs to JAGS for each model
-#Random Walk w/ year effect
-data.RandomWalk_year_effect <- list(y=y, N=length(y),x_ic=20,tau_ic = 0.01, a_add = 0.001,r_add = 0.001, a_obs = 10, r_obs = 10,  year_no=dat2$year_no, max_year = 21)
-variable.names.RandomWalk_year_effect<- c("tau_add", "tau_obs", "tau_yr")
-variable.namesout.RandomWalk_year_effect<- c("tau_add", "mu", "tau_obs", "tau_yr")
-init.RandomWalk_year_effect <- list(list(tau_add=0.001, tau_obs = 0.001, tau_yr = 0.001), list(tau_add=0.1, tau_obs = 0.1,  tau_yr = 0.1), list(tau_add=1, tau_obs = 1,  tau_yr = 1))
-params.RandomWalk_year_effect <- c("tau_add", "tau_obs","tau_yr")
-
-#Random Walk w/ site effect
-data.RandomWalk_site_effect <- list(y=y, N=length(y),x_ic=20,tau_ic = 0.01, a_add = 0.001,r_add = 0.001, a_obs = 10, r_obs = 10, site_no=dat2$site_no, max_site = 9)
-variable.names.RandomWalk_site_effect<- c("tau_add", "tau_obs", "tau_site")
-variable.namesout.RandomWalk_site_effect<- c("tau_add", "mu", "tau_obs", "tau_site")
-init.RandomWalk_site_effect <- list(list(tau_add=0.001, tau_obs = 0.001, tau_site = 0.001), list(tau_add=0.1, tau_obs = 0.1, tau_site = 0.1), list(tau_add=1, tau_obs = 1, tau_site = 1))
-params.RandomWalk_site_effect <- c("tau_add", "tau_obs","tau_site")
+# #Random Walk w/ year effect
+# data.RandomWalk_year_effect <- list(y=y, N=length(y),x_ic=20,tau_ic = 0.01, a_add = 0.001,r_add = 0.001, a_obs = 10, r_obs = 10,  year_no=dat2$year_no, max_year = 21)
+# variable.names.RandomWalk_year_effect<- c("tau_add", "tau_obs", "tau_yr")
+# variable.namesout.RandomWalk_year_effect<- c("tau_add", "mu", "tau_obs", "tau_yr")
+# init.RandomWalk_year_effect <- list(list(tau_add=0.001, tau_obs = 0.001, tau_yr = 0.001), list(tau_add=0.1, tau_obs = 0.1,  tau_yr = 0.1), list(tau_add=1, tau_obs = 1,  tau_yr = 1))
+# params.RandomWalk_year_effect <- c("tau_add", "tau_obs","tau_yr")
+# 
+# #Random Walk w/ site effect
+# data.RandomWalk_site_effect <- list(y=y, N=length(y),x_ic=20,tau_ic = 0.01, a_add = 0.001,r_add = 0.001, a_obs = 10, r_obs = 10, site_no=dat2$site_no, max_site = 9)
+# variable.names.RandomWalk_site_effect<- c("tau_add", "tau_obs", "tau_site")
+# variable.namesout.RandomWalk_site_effect<- c("tau_add", "mu", "tau_obs", "tau_site")
+# init.RandomWalk_site_effect <- list(list(tau_add=0.001, tau_obs = 0.001, tau_site = 0.001), list(tau_add=0.1, tau_obs = 0.1, tau_site = 0.1), list(tau_add=1, tau_obs = 1, tau_site = 1))
+# params.RandomWalk_site_effect <- c("tau_add", "tau_obs","tau_site")
 
 
 #Random Walk w/ site-year effect
-data.RandomWalk_site_year_effect <- list(y=y,x_ic=20,tau_ic = 0.01, a_add = 0.001,r_add = 0.001, a_obs = 10, r_obs = 10, site_no=site_no, max_site = 9, year_no=year_no, max_year = 20)
+data.RandomWalk_site_year_effect <- list(y=y,N = N, x_ic=20,tau_ic = 0.01, a_add = 0.001,r_add = 0.001, a_obs = 10, r_obs = 10, site_no=site_no, max_site = 9, year_no=year_no, max_year = 20)
 variable.names.RandomWalk_site_year_effect<- c("tau_add", "tau_obs", "tau_site", "tau_yr")
 variable.namesout.RandomWalk_site_year_effect<- c("tau_add", "mu", "tau_obs", "tau_site","tau_yr")
 init.RandomWalk_site_year_effect <- list(list(tau_add=0.001, tau_obs = 0.001, tau_site = 0.001, tau_yr = 0.001), list(tau_add=0.1, tau_obs = 0.1, tau_site = 0.1, tau_yr = 0.1), list(tau_add=1, tau_obs = 1, tau_site = 1, tau_yr = 1))
@@ -76,7 +77,7 @@ j.model   <- jags.model (file = model,
 #run model
 jags.out <- run.jags(model = model,
                      data = jags_plug_ins$data.model,
-                     burnin =  2000, 
+                     burnin =  10000, 
                      sample = 5000, 
                      n.chains = 3, 
                      inits=jags_plug_ins$init.model,
@@ -95,4 +96,5 @@ for (i in 1:length(params)){
 #get a matrix to work w/ for predictive intervals, etc.
 jags.out.mcmc <- as.mcmc.list(jags.out)
 out <- as.matrix(jags.out.mcmc)
+
 
