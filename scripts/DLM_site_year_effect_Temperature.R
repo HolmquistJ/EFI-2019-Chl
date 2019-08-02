@@ -18,7 +18,7 @@ model{
       mu[i,j]~dnorm(x[i,j],tau_add) #mus are the latent state (true chl-a)
       
       #this is the process model with a covariate and random year and site effects
-      x[i,j] <- beta[1] + beta[2]*x[i,j-1] + beta[3]*Temp[i,j] + yr[year_no[j]] + site[site_no[i]]
+      x[i,j] <- beta[1] + beta[2]*x[i,j-1] + beta[3]*mu_T[i,j] + yr[year_no[j]] + site[site_no[i]]
       
       #process model for temperature
       mu_T[i,j]~dnorm(mo_avg[j],tau_add_T)

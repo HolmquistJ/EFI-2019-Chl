@@ -102,13 +102,13 @@ jags_plug_ins <- list(data.model = data, variable.names.model = variable.names, 
 
 
 #define model and initialize
-j.model   <- jags.model (file = model,
+j.model1   <- jags.model (file = model,
                          data = jags_plug_ins$data.model,
                          inits = jags_plug_ins$init.model,
                          n.chains = 3)
 
 #run model
-jags.out <- run.jags(model = model,
+jags.out1 <- run.jags(model = model,
                      data = jags_plug_ins$data.model,
                      burnin =  2000, 
                      sample = 2000, 
@@ -127,8 +127,11 @@ for (i in 1:length(params)){
 }
 
 #get a matrix to work w/ for predictive intervals, etc.
-jags.out.mcmc <- as.mcmc.list(jags.out)
-out <- as.matrix(jags.out.mcmc)
+jags.out.mcmc1 <- as.mcmc.list(jags.out1)
+out1 <- as.matrix(jags.out.mcmc1)
+
+sum <- summary(jags.out1, vars = jags_plug_ins$variable.names.model)
+sum
 
 colnames(out[,2160:2168])
 
@@ -136,25 +139,25 @@ dates <- dat <- read_csv("./data/derivative/UMR_chl_tribs_bymonth_curated_wideFo
   mutate(date = ymd(paste(year, month, 15, sep="-")))
 
 time <- as.Date(as.character(dates$date))
-times <- time[13:252]
+times <- time[49:72]
 #time.rng = c(1,20) ## adjust to zoom in and out
 ciEnvelope <- function(x,ylo,yhi,...){
   polygon(cbind(c(x, rev(x), x[1]), c(ylo, rev(yhi),
                                       ylo[1])), border = NA,...) 
 }
 
-mus=grep("mu\\[9,", colnames(out))
-mu = out[,mus]
+mus=grep("mu_T\\[9,", colnames(out1))
+mu = out1[,mus]
 ci <- apply(mu,2,quantile,c(0.025,0.5,0.975))
 
 
 png(file=file.path("C:/Users/Mary Lofton/Desktop/EFI_2019_WG",paste(paste0(model_name,'_chla_CI.png'), sep = '_')), res=300, width=30, height=15, units='cm')
-plot(times,ci[2,],type='n', ylab="Chl-a", ylim = c(min(ci[1,]),max(ci[3,])),main="Obs, Latent CI (blue), PI (green), Obs PI (grey)")
-ciEnvelope(times,ci[1,],ci[3,],col="lightBlue")
+plot(times,ci[2,37:60],type='n', ylab="Temp", ylim = c(min(ci[1,37:60]),max(ci[3,37:60])),main="Obs = +, Latent CI = blue")
+ciEnvelope(times,ci[1,37:60],ci[3,37:60],col="lightBlue")
 ciEnvelope(times,obs_pi[1,],obs_pi[3,],col="gray")
 ciEnvelope(times,pi[1,],pi[3,],col="Green")
-points(times,y[9,],pch="+",cex=0.8)
-points(times,ci[2,217:240],pch = 5, cex = 0.8)
+points(times,Temp[9,37:60],pch="+",cex=0.8)
+lines(times[9:24],ci[2,45:60],lwd = 2)
 dev.off()
 
 
