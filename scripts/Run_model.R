@@ -122,7 +122,7 @@ params <- jags_plug_ins$params.model
 #look at param traceplots
 for (i in 1:length(params)){
   png(file=file.path("C:/Users/Mary Lofton/Desktop/EFI_2019_WG",paste(paste0(model_name,'_Convergence_',params[i],'.png'), sep = '_')))
-  plot(jags.out, vars == params[i]) 
+  plot(jags.out, vars = params[i]) 
   dev.off()
 }
 
